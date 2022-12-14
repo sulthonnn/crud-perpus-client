@@ -130,7 +130,7 @@ const BookList = () => {
                         </td>
                       </tr>
                     ))
-                    .splice(0, 8)}
+                    .splice(0, 10)}
                 </tbody>
               </table>
             </main>
