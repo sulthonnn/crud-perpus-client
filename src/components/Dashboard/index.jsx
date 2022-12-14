@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { useSelector } from "react-redux";
+
+import { bookSelectors } from "../../features/bookSlice.jsx";
+import { memberSelectors } from "../../features/memberSlice.jsx";
+import { circulationSelectors } from "../../features/circulationSlice.jsx";
+import { logSelectors } from "../../features/logSlice.jsx";
+import { userSelectors } from "../../features/userSlice.jsx";
 
 import {
   AiFillBook,
@@ -12,44 +18,11 @@ import { GrCatalog } from "react-icons/gr";
 import styles from "./Dashboard.module.css";
 
 const Dashboard = () => {
-  const [books, setBooks] = useState([]);
-  const [members, setMembers] = useState([]);
-  const [circulations, setCirculations] = useState([]);
-  const [logs, setLogs] = useState([]);
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    getBooks();
-    getMembers();
-    getCirculations();
-    getLogs();
-    getUsers();
-  }, []);
-
-  const getUsers = async () => {
-    const response = await axios.get("http://localhost:8080/users");
-    setUsers(response.data);
-  };
-
-  const getLogs = async () => {
-    const response = await axios.get("http://localhost:8080/logs");
-    setLogs(response.data);
-  };
-
-  const getCirculations = async () => {
-    const response = await axios.get("http://localhost:8080/circulations");
-    setCirculations(response.data);
-  };
-
-  const getMembers = async () => {
-    const response = await axios.get("http://localhost:8080/members");
-    setMembers(response.data);
-  };
-
-  const getBooks = async () => {
-    const response = await axios.get(`http://localhost:8080/books`);
-    setBooks(response.data);
-  };
+  const books = useSelector(bookSelectors.selectAll);
+  const members = useSelector(memberSelectors.selectAll);
+  const circulations = useSelector(circulationSelectors.selectAll);
+  const logs = useSelector(logSelectors.selectAll);
+  const users = useSelector(userSelectors.selectAll);
 
   return (
     <div className="container">
@@ -64,7 +37,7 @@ const Dashboard = () => {
             </p>
             <AiFillBook className={styles.logo} />
             <h2 className="content title is-5 has-text-centered has-text-warning-light">
-              Books
+              Book
             </h2>
           </div>
           <footer className="card-footer">
@@ -83,7 +56,7 @@ const Dashboard = () => {
             </p>
             <AiOutlineUsergroupAdd className={styles.logo} />
             <h2 className="content title is-5 has-text-centered has-text-warning-light">
-              Members
+              Member
             </h2>
           </div>
           <footer className="card-footer">
@@ -102,7 +75,7 @@ const Dashboard = () => {
             </p>
             <AiOutlineSync className={styles.logo} />
             <h2 className="content title is-5 has-text-centered has-text-warning-light">
-              Circulations
+              Circulation
             </h2>
           </div>
           <footer className="card-footer">
@@ -121,7 +94,7 @@ const Dashboard = () => {
             </p>
             <GrCatalog className={styles.logo} style={{ opacity: 0.6 }} />
             <h2 className="content title is-5 has-text-centered has-text-warning-light">
-              Logs
+              Log Data
             </h2>
           </div>
           <footer className="card-footer">
@@ -140,7 +113,7 @@ const Dashboard = () => {
             </p>
             <AiOutlineUser className={styles.logo} />
             <h2 className="content title is-5 has-text-centered has-text-warning-light">
-              Users
+              User
             </h2>
           </div>
           <footer className="card-footer">

@@ -57,19 +57,19 @@ const SideBar = () => {
           <li>
             <NavLink to={"/books"}>
               <IoBookSharp className="mr-2" />
-              Books
+              Book
             </NavLink>
           </li>
           <li>
             <NavLink to={"/members"}>
               <IoPersonSharp className="mr-2" />
-              Members
+              Member
             </NavLink>
           </li>
           <li>
             <NavLink to={"/circulations"}>
               <FaSyncAlt className="mr-2" />
-              Circulations
+              Circulation
             </NavLink>
           </li>
           <li>
@@ -84,7 +84,7 @@ const SideBar = () => {
           <li>
             <NavLink to={"/users"}>
               <IoPersonSharp className="mr-2" />
-              Users
+              User
             </NavLink>
           </li>
         </ul>

@@ -84,6 +84,7 @@ const AddCirculation = () => {
                     type="text"
                     value={queryBook}
                     onChange={(e) => setQueryBook(e.target.value)}
+                    placeholder="Book Name"
                     required={true}
                   />
                   <datalist id={books}>
@@ -110,6 +111,7 @@ const AddCirculation = () => {
                     type="text"
                     value={queryMember}
                     onChange={(e) => setQueryMember(e.target.value)}
+                    placeholder="Member Name"
                     required={true}
                   />
                   <datalist id={members}>
