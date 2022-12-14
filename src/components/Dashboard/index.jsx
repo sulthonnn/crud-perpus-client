@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
-import { bookSelectors } from "../../features/bookSlice.jsx";
-import { memberSelectors } from "../../features/memberSlice.jsx";
-import { circulationSelectors } from "../../features/circulationSlice.jsx";
-import { logSelectors } from "../../features/logSlice.jsx";
-import { userSelectors } from "../../features/userSlice.jsx";
+import { bookSelectors, getBooks } from "../../features/bookSlice.jsx";
+import { memberSelectors, getMembers } from "../../features/memberSlice.jsx";
+import {
+  circulationSelectors,
+  getCirculations,
+} from "../../features/circulationSlice.jsx";
+import { logSelectors, getLogs } from "../../features/logSlice.jsx";
+import { userSelectors, getUsers } from "../../features/userSlice.jsx";
 
 import {
   AiFillBook,
@@ -23,6 +26,15 @@ const Dashboard = () => {
   const circulations = useSelector(circulationSelectors.selectAll);
   const logs = useSelector(logSelectors.selectAll);
   const users = useSelector(userSelectors.selectAll);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getBooks());
+    dispatch(getMembers());
+    dispatch(getCirculations());
+    dispatch(getLogs());
+    dispatch(getUsers());
+  }, [dispatch]);
 
   return (
     <div className="container">
