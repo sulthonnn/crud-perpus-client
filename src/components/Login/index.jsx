@@ -6,6 +6,7 @@ import { LoginUser, reset } from "../../features/authSlice.jsx";
 
 import { IoPersonSharp, IoLockClosed } from "react-icons/io5";
 import { FcReadingEbook } from "react-icons/fc";
+import background from "../../assets/background.jpg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -37,7 +38,20 @@ const Login = () => {
   //console.log(user);
 
   return (
-    <section className="hero has-background-grey-light is-fullheight is-fullwidth">
+    <section
+      className="hero is-fullheight is-fullwidth"
+      style={{
+        backgroundImage: `url(${background})`,
+        backgroundSize: "cover",
+      }}
+    >
+      <a
+        className="help has-text-black has-text-weight-bold mt-1"
+        style={{ position: "relative", top: 0, left: "82%" }}
+        href="http://www.freepik.com"
+      >
+        Designed by Katemangostar / Freepik
+      </a>
       <div className="hero-body">
         <div className="container">
           <div className="columns is-centered">
