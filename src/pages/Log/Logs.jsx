@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { getMe } from "../../features/authSlice.jsx";
-import Layout from "../../Layout/layout.jsx";
 import Logs from "../../components/Log/Logs.jsx";
 
 const LogBooks = () => {
@@ -21,11 +20,7 @@ const LogBooks = () => {
     }
   }, [isError, navigate]);
 
-  return (
-    <Layout>
-      <Logs />
-    </Layout>
-  );
+  return <Logs />;
 };
 
 export default LogBooks;

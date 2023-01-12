@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 
-import { saveCirculation } from "../../features/circulationSlice.jsx";
+// import { saveCirculation } from "../../features/circulationSlice.jsx";
 import { getBooks, bookSelectors } from "../../features/bookSlice.jsx";
 import { getMembers, memberSelectors } from "../../features/memberSlice.jsx";
 
@@ -11,24 +12,53 @@ const AddCirculation = () => {
   // const [members, setMembers] = useState([]);
   const [loanDate, setLoanDate] = useState(new Date().toLocaleString());
   const [queryBook, setQueryBook] = useState("");
+  const [queryBookAuthor, setQueryBookAuthor] = useState("");
+  const [queryID, setQueryID] = useState("");
   const [queryMember, setQueryMember] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const books = useSelector(bookSelectors.selectAll);
+  const booksA = useSelector(bookSelectors.selectEntities);
   const members = useSelector(memberSelectors.selectAll);
+  const memberID = useSelector(memberSelectors.selectIds);
 
   useEffect(() => {
     dispatch(getBooks());
     dispatch(getMembers());
   }, [dispatch]);
 
-  const createCirculation = async (e) => {
+  // const createCirculation = async (e) => {
+  //   e.preventDefault();
+  //   await dispatch(
+  //     saveCirculation({
+  //       book: {
+  //         name: queryBook,
+  //         author: queryBookAuthor,
+  //       },
+  //       member: queryMember,
+  //       loanDate,
+  //     })
+  //   );
+  //   navigate("/circulations");
+  // };
+  const saveCirculation = async (e) => {
     e.preventDefault();
-    await dispatch(
-      saveCirculation({ book: queryBook, member: queryMember, loanDate })
-    );
-    navigate("/circulations");
+    try {
+      await axios.post("http://localhost:8080/circulation", {
+        book: {
+          title: queryBook,
+          author: queryBookAuthor,
+        },
+        member: { id: queryID, name: queryMember },
+        loanDate,
+      });
+      navigate("/circulations");
+    } catch (error) {
+      if (error) {
+        console.log(error);
+      }
+    }
   };
 
   // useEffect(() => {
@@ -46,23 +76,6 @@ const AddCirculation = () => {
   //   setBooks(response.data);
   // };
 
-  // const saveCirculation = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await axios.post("http://localhost:8080/add-circulation", {
-  //       book: queryBook,
-  //       member: queryMember,
-  //       loanDate,
-  //     });
-  //     navigate("/circulations");
-  //   } catch (error) {
-  //     if (error) {
-  //       console.log(error);
-  //     }
-  //     return error;
-  //   }
-  // };
-
   // // console.log(bookName);
 
   // //console.log(queryMember);
@@ -74,7 +87,7 @@ const AddCirculation = () => {
       <div className="card is-shadowless">
         <div className="card-content">
           <div className="content">
-            <form onSubmit={createCirculation}>
+            <form onSubmit={saveCirculation}>
               <div className="field">
                 <label className="label">Book Name</label>
                 <div className="control">
@@ -97,6 +110,63 @@ const AddCirculation = () => {
                       .map((book) => (
                         <option key={book._id} value={book.name}>
                           {book.name}
+                        </option>
+                      ))}
+                  </datalist>
+                </div>
+              </div>
+              <div className="field">
+                <label className="label">Author</label>
+                <div className="control">
+                  <input
+                    className="input"
+                    list={booksA}
+                    type="text"
+                    value={queryBookAuthor}
+                    onChange={(e) => setQueryBookAuthor(e.target.value)}
+                    placeholder="Author"
+                    required={true}
+                  />
+                  <datalist id={booksA}>
+                    {books
+                      .filter((book) => {
+                        return queryBookAuthor.toLowerCase() === ""
+                          ? book
+                          : book.author
+                              .toLowerCase()
+                              .includes(queryBookAuthor) ||
+                              book.name.toLowerCase().includes(queryBookAuthor);
+                      })
+                      .map((book) => (
+                        <option key={book._id} value={book.author}>
+                          {book.name}
+                        </option>
+                      ))}
+                  </datalist>
+                </div>
+              </div>
+              <div className="field">
+                <label className="label">ID Member</label>
+                <div className="control">
+                  <input
+                    className="input"
+                    list={memberID}
+                    type="text"
+                    value={queryID}
+                    onChange={(e) => setQueryID(e.target.value)}
+                    placeholder="ID Member"
+                    required={true}
+                  />
+                  <datalist id={memberID}>
+                    {members
+                      .filter((member) => {
+                        return queryMember.toLowerCase() === ""
+                          ? member
+                          : member._id.toLowerCase().includes(queryMember);
+                      })
+                      .map((member) => (
+                        <option key={member._id} value={member._id}>
+                          {member.name}
                         </option>
                       ))}
                   </datalist>

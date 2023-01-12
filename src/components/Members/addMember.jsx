@@ -1,22 +1,37 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
 
-import { saveMember } from "../../features/memberSlice.jsx";
+import axios from "axios";
 
 const AddMember = () => {
+  const [ID, setID] = useState("");
   const [name, setName] = useState("");
   const [gender, setGender] = useState("M");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const createMember = async (e) => {
     e.preventDefault();
-    await dispatch(saveMember({ name, gender, address, email, phone }));
-    navigate("/members");
+
+    try {
+      await axios.post("http://localhost:8080/member", {
+        _id: ID,
+        name,
+        gender,
+        address,
+        email,
+        phone,
+      });
+      navigate("/members");
+    } catch (error) {
+      if (error.response) {
+        setMessage("ID already exists");
+        return;
+      }
+    }
   };
 
   // const saveMember = async (e) => {
@@ -45,6 +60,23 @@ const AddMember = () => {
         <div className="card-content">
           <div className="content">
             <form onSubmit={createMember}>
+              <div className="field">
+                <label className="label">ID</label>
+                <div className="control">
+                  <input
+                    type="text"
+                    pattern="\d*"
+                    maxLength="10"
+                    minLength="10"
+                    className="input"
+                    value={ID}
+                    onChange={(e) => setID(e.target.value)}
+                    placeholder="ID"
+                    required={true}
+                  />
+                </div>
+              </div>
+              <p className="help has-text-danger">{message}</p>
               <div className="field">
                 <label className="label">Name</label>
                 <div className="control">

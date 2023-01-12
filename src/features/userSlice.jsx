@@ -18,7 +18,7 @@ export const saveUser = createAsyncThunk(
   "users/saveUser",
   async ({ username, email, password, confirmPassword }) => {
     try {
-      const response = await axios.post("http://localhost:8080/add-user", {
+      const response = await axios.post("http://localhost:8080/user", {
         username,
         email,
         password,
@@ -50,7 +50,7 @@ export const updateUser = createAsyncThunk(
 
 export const deleteUser = createAsyncThunk("users/deleteUser", async (id) => {
   try {
-    await axios.delete(`http://localhost:8080/delete-user/${id}`);
+    await axios.delete(`http://localhost:8080/user/${id}`);
     return id;
   } catch (error) {
     if (error.response) return error.message;

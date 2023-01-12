@@ -18,7 +18,7 @@ export const saveLog = createAsyncThunk(
   "logs/saveLogs",
   async ({ book, member, loanDate, returnDate }) => {
     try {
-      const response = await axios.post("http://localhost:8080/add-log", {
+      const response = await axios.post("http://localhost:8080/log", {
         book,
         member,
         loanDate,
@@ -30,6 +30,15 @@ export const saveLog = createAsyncThunk(
     }
   }
 );
+
+export const deleteLog = createAsyncThunk("logs/deleteLog", async (id) => {
+  try {
+    await axios.delete(`http://localhost:8080/log/${id}`);
+    return id;
+  } catch (error) {
+    if (error.response) return error.message;
+  }
+});
 
 const logEntity = createEntityAdapter({
   selectId: (log) => log._id,
@@ -44,6 +53,9 @@ const logSlice = createSlice({
     });
     builder.addCase(saveLog.fulfilled, (state, action) => {
       logEntity.addOne(state, action.payload);
+    });
+    builder.addCase(deleteLog.fulfilled, (state, action) => {
+      logEntity.removeOne(state, action.payload);
     });
   },
 });

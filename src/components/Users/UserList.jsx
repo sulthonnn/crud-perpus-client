@@ -8,9 +8,7 @@ import {
   userSelectors,
 } from "../../features/userSlice.jsx";
 
-import Navbar from "../Navbar";
-import Sidebar from "../Sidebar";
-import Footer from "../Footer";
+import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
 
 const UserList = () => {
@@ -64,79 +62,66 @@ const UserList = () => {
           onDelete={() => handleDeleteUser(deleteId)}
         />
       )}
-      <Navbar />
-      <div className="columns mt-6 mb-0" style={{ minHeight: "100vh" }}>
-        <div className="column is-2">
-          <Sidebar />
-        </div>
-        <div className="column has-background-light">
-          <div className="container is-fluid">
-            <main>
-              <h1 className="title has-text-centered mt-3 mb-0">
-                List of Users
-              </h1>
-              <div className="columns mb-0">
-                <div className="column">
-                  <Link to={"/add-user"} className="button is-primary">
-                    Add New
-                  </Link>
-                </div>
-                <div className="column">
-                  <input
-                    className="input is-normal column is-6 is-offset-6"
-                    type="text"
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search"
-                  />
-                </div>
-              </div>
-              <p className="help mt-0">Total: {users.length}</p>
-              <table className="table is-stripped is-fullwidth">
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users
-                    .filter((user) => {
-                      return query.toLowerCase() === ""
-                        ? user
-                        : user.username.toLowerCase().includes(query) ||
-                            user.email.toLowerCase().includes(query);
-                    })
-                    .map((user, index) => (
-                      <tr key={user._id}>
-                        <td>{index + 1}</td>
-                        <td>{user.username}</td>
-                        <td>{user.email}</td>
-                        <td>
-                          <Link
-                            to={`/user/${user._id}`}
-                            className="button is-small is-info"
-                          >
-                            Edit
-                          </Link>
-                          <button
-                            onClick={() => handleClickDelete(user._id)}
-                            className="button is-small is-danger"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                    .splice(0, 10)}
-                </tbody>
-              </table>
-            </main>
+      <Layout>
+        <h1 className="title has-text-centered mt-3 mb-0">List of Users</h1>
+        <div className="columns mb-0">
+          <div className="column">
+            <Link to={"/add-user"} className="button is-primary">
+              Add New
+            </Link>
+          </div>
+          <div className="column">
+            <input
+              className="input is-normal column is-6 is-offset-6"
+              type="text"
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search"
+            />
           </div>
         </div>
-      </div>
-      <Footer />
+        <p className="help mt-0">Total: {users.length}</p>
+        <table className="table is-stripped is-fullwidth">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users
+              .filter((user) => {
+                return query.toLowerCase() === ""
+                  ? user
+                  : user.username.toLowerCase().includes(query) ||
+                      user.email.toLowerCase().includes(query);
+              })
+              .map((user, index) => (
+                <tr key={user._id}>
+                  <td>{index + 1}</td>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>
+                    <Link
+                      to={`/user/${user._id}`}
+                      className="button is-small is-info"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => handleClickDelete(user._id)}
+                      className="button is-small is-danger"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+              .splice(0, 10)}
+          </tbody>
+        </table>
+      </Layout>
     </>
   );
 };

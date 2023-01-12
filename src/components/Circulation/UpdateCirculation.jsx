@@ -14,12 +14,14 @@ const UpdateCirculation = () => {
   // const [members, setMembers] = useState([]);
   const [loanDate, setLoanDate] = useState(new Date().toLocaleString());
   const [queryBook, setQueryBook] = useState("");
+  const [queryBookAuthor, setQueryBookAuthor] = useState("");
   const [queryMember, setQueryMember] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const books = useSelector(bookSelectors.selectAll);
+  const booksA = useSelector(bookSelectors.selectEntities);
   const members = useSelector(memberSelectors.selectAll);
   const circulation = useSelector((state) =>
     circulationSelectors.selectById(state, id)
@@ -32,7 +34,8 @@ const UpdateCirculation = () => {
 
   useEffect(() => {
     if (circulation) {
-      setQueryBook(circulation.book);
+      setQueryBook(circulation.book.name);
+      setQueryBookAuthor(circulation.book.author);
       setQueryMember(circulation.member);
       setLoanDate(circulation.loanDate);
     }
@@ -41,7 +44,12 @@ const UpdateCirculation = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     await dispatch(
-      updateCirculation({ id, book: queryBook, member: queryMember, loanDate })
+      updateCirculation({
+        id,
+        book: { name: queryBook, author: queryBookAuthor },
+        member: queryMember,
+        loanDate,
+      })
     );
     navigate("/circulations");
   };
@@ -112,7 +120,6 @@ const UpdateCirculation = () => {
                     onChange={(e) => setQueryBook(e.target.value)}
                     required={true}
                   />
-
                   <datalist id={books}>
                     {books
                       .filter((book) => {
@@ -128,6 +135,38 @@ const UpdateCirculation = () => {
                   </datalist>
                 </div>
               </div>
+
+              <div className="field">
+                <label className="label">Author</label>
+                <div className="control">
+                  <input
+                    className="input"
+                    list={booksA}
+                    type="text"
+                    value={queryBookAuthor}
+                    onChange={(e) => setQueryBookAuthor(e.target.value)}
+                    placeholder="Author"
+                    required={true}
+                  />
+                  <datalist id={booksA}>
+                    {books
+                      .filter((book) => {
+                        return queryBookAuthor.toLowerCase() === ""
+                          ? book
+                          : book.author
+                              .toLowerCase()
+                              .includes(queryBookAuthor) ||
+                              book.name.toLowerCase().includes(queryBookAuthor);
+                      })
+                      .map((book) => (
+                        <option key={book._id} value={book.author}>
+                          {book.name}
+                        </option>
+                      ))}
+                  </datalist>
+                </div>
+              </div>
+
               <div className="field">
                 <label className="label">Member Name</label>
                 <div className="control">

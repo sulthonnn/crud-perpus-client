@@ -14,23 +14,24 @@ export const getMembers = createAsyncThunk("members/getMembers", async () => {
   }
 });
 
-export const saveMember = createAsyncThunk(
-  "members/saveMember",
-  async ({ name, gender, address, email, phone }) => {
-    try {
-      const response = await axios.post("http://localhost:8080/add-member", {
-        name,
-        gender,
-        address,
-        email,
-        phone,
-      });
-      return response.data;
-    } catch (error) {
-      if (error.response) return error.message;
-    }
-  }
-);
+// export const saveMember = createAsyncThunk(
+//   "members/saveMember",
+//   async ({ _id, name, gender, address, email, phone }) => {
+//     try {
+//       const response = await axios.post("http://localhost:8080/member", {
+//         _id,
+//         name,
+//         gender,
+//         address,
+//         email,
+//         phone,
+//       });
+//       return response.data;
+//     } catch (error) {
+//       if (error.response) return error.message;
+//     }
+//   }
+// );
 
 export const updateMember = createAsyncThunk(
   "members/updateMember",
@@ -54,7 +55,7 @@ export const deleteMember = createAsyncThunk(
   "members/deleteMember",
   async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/delete-member/${id}`);
+      await axios.delete(`http://localhost:8080/member/${id}`);
       return id;
     } catch (error) {
       if (error.response) return error.message;
@@ -73,9 +74,9 @@ const memberSlice = createSlice({
     builder.addCase(getMembers.fulfilled, (state, action) => {
       memberEntity.setAll(state, action.payload);
     });
-    builder.addCase(saveMember.fulfilled, (state, action) => {
-      memberEntity.addOne(state, action.payload);
-    });
+    // builder.addCase(saveMember.fulfilled, (state, action) => {
+    //   memberEntity.addOne(state, action.payload);
+    // });
     builder.addCase(updateMember.fulfilled, (state, action) => {
       memberEntity.updateOne(state, {
         id: action.payload.id,

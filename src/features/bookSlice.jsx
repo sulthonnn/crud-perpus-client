@@ -18,7 +18,7 @@ export const saveBook = createAsyncThunk(
   "books/saveBook",
   async ({ name, category, author, publisher, year }) => {
     try {
-      const response = await axios.post("http://localhost:8080/add-book", {
+      const response = await axios.post("http://localhost:8080/book", {
         name,
         category,
         author,
@@ -52,7 +52,7 @@ export const updateBook = createAsyncThunk(
 
 export const deleteBook = createAsyncThunk("books/deleteBook", async (id) => {
   try {
-    await axios.delete(`http://localhost:8080/delete-book/${id}`);
+    await axios.delete(`http://localhost:8080/book/${id}`);
     return id;
   } catch (error) {
     if (error.response) return error.message;
