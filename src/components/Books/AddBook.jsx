@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-
-import { saveBook } from "../../features/bookSlice.jsx";
+import axios from "axios";
 
 const AddBook = () => {
   const [name, setName] = useState("");
@@ -11,31 +9,24 @@ const AddBook = () => {
   const [publisher, setPublisher] = useState("");
   const [year, setYear] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const createBook = async (e) => {
+  const saveBook = async (e) => {
     e.preventDefault();
-    await dispatch(saveBook({ name, category, author, publisher, year }));
-    navigate("/books");
+    try {
+      await axios.post("http://localhost:8080/book", {
+        name,
+        category,
+        author,
+        publisher,
+        year,
+      });
+      navigate("/books");
+    } catch (error) {
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    }
   };
-
-  // const saveBook = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await axios.post("http://localhost:8080/add-book", {
-  //       name,
-  //       category,
-  //       author,
-  //       publisher,
-  //       year,
-  //     });
-  //     navigate("/books");
-  //   } catch (error) {
-  //     if (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // };
 
   return (
     <div className="container is-fluid">
@@ -44,7 +35,7 @@ const AddBook = () => {
       <div className="card is-shadowless">
         <div className="card-content">
           <div className="content">
-            <form onSubmit={createBook}>
+            <form onSubmit={saveBook}>
               <div className="field">
                 <label className="label">Book Name</label>
                 <div className="control">

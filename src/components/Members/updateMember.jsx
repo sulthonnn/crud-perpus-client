@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-
-import { memberSelectors, updateMember } from "../../features/memberSlice.jsx";
+import axios from "axios";
 
 const UpdateMember = () => {
   const [name, setName] = useState("");
@@ -12,59 +10,40 @@ const UpdateMember = () => {
   const [phone, setPhone] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const member = useSelector((state) => memberSelectors.selectById(state, id));
 
   useEffect(() => {
-    if (member) {
-      setName(member.name);
-      setGender(member.gender);
-      setAddress(member.address);
-      setEmail(member.email);
-      setPhone(member.phone);
-    }
-  }, [member]);
+    const getMemberById = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/member/${id}`);
+        setName(response.data.name);
+        setGender(response.data.gender);
+        setAddress(response.data.address);
+        setEmail(response.data.email);
+        setPhone(response.data.phone);
+      } catch (error) {
+        if (error) console.log(error);
+      }
+    };
+    getMemberById();
+  }, [id]);
 
-  const handleUpdate = async (e) => {
+  const updateMember = async (e) => {
     e.preventDefault();
-    dispatch(updateMember({ id, name, gender, address, email, phone }));
-    navigate("/members");
+    try {
+      await axios.patch(`http://localhost:8080/member/${id}`, {
+        name,
+        gender,
+        address,
+        email,
+        phone,
+      });
+      navigate("/members");
+    } catch (error) {
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    }
   };
-
-  // useEffect(() => {
-  //   const getMemberById = async () => {
-  //     try {
-  //       const response = await axios.get(`http://localhost:8080/member/${id}`);
-  //       setName(response.data.name);
-  //       setGender(response.data.gender);
-  //       setAddress(response.data.address);
-  //       setEmail(response.data.email);
-  //       setPhone(response.data.phone);
-  //     } catch (error) {
-  //       if (error) console.log(error);
-  //     }
-  //   };
-  //   getMemberById();
-  // }, [id]);
-
-  // const updateMember = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await axios.patch(`http://localhost:8080/member/${id}`, {
-  //       name,
-  //       gender,
-  //       address,
-  //       email,
-  //       phone,
-  //     });
-  //     navigate("/members");
-  //   } catch (error) {
-  //     if (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // };
 
   return (
     <div className="container is-fluid">
@@ -73,7 +52,7 @@ const UpdateMember = () => {
       <div className="card is-shadowless">
         <div className="card-content">
           <div className="content">
-            <form onSubmit={handleUpdate}>
+            <form onSubmit={updateMember}>
               <div className="field">
                 <label className="label">Name</label>
                 <div className="control">

@@ -1,48 +1,58 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-
-import {
-  getCirculations,
-  deleteCirculation,
-  circulationSelectors,
-} from "../../features/circulationSlice.jsx";
-import { saveLog } from "../../features/logSlice.jsx";
+import axios from "axios";
+import ReactPaginate from "react-paginate";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
 
 const Circulations = () => {
-  //const [circulation, setCirculations] = useState([]);
+  const [circulations, setCirculations] = useState([]);
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [rows, setRows] = useState(0);
+  const [pages, setPages] = useState(0);
+  const [keyword, setKeyword] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const [deleteId, setDeleteId] = useState("");
+  const [message, setMessage] = useState("");
   const [addToLog, setAddToLog] = useState("");
-  const dispatch = useDispatch();
-
-  const circulations = useSelector(circulationSelectors.selectAll);
 
   useEffect(() => {
-    dispatch(getCirculations());
-  }, [dispatch]);
+    getCirculations();
+  }, [page, keyword]);
 
-  const createLog = async (data) => {
-    await dispatch(saveLog(data));
+  const getCirculations = async () => {
+    const response = await axios.get(
+      `http://localhost:8080/circulation?page=${page}&search=${keyword}`
+    );
+    setCirculations(response.data.circulations);
+    setPage(response.data.page);
+    setRows(response.data.totalRows);
+    setPages(response.data.totalPages);
   };
 
-  const handleAddLog = (book, member, loanDate, returnDate) => {
-    setAddToLog({ book, member, loanDate, returnDate });
-    setShowDelete(true);
+  const addLog = async (data) => {
+    await axios.post("http://localhost:8080/log", data);
   };
 
-  const handleClickDelete = (id) => {
-    setDeleteId(id);
-    setShowDelete(true);
-  };
-
-  const handleDeleteUser = async (id) => {
-    await dispatch(deleteCirculation(id));
-    setShowDelete(false);
+  const handleAddLog = (
+    title,
+    author,
+    memberId,
+    memberName,
+    loanDate,
+    returnDate
+  ) => {
+    setAddToLog({
+      book: {
+        title,
+        author,
+      },
+      member: { id: memberId, name: memberName },
+      loanDate,
+      returnDate,
+    });
   };
 
   const addDays = (date, days) => {
@@ -51,30 +61,34 @@ const Circulations = () => {
     return result;
   };
 
-  console.log();
-  // useEffect(() => {
-  //   getCirculations();
-  // }, []);
+  const handleClickDelete = (id) => {
+    setDeleteId(id);
+    setShowDelete(true);
+  };
 
-  // const getCirculations = async () => {
-  //   const response = await axios.get("http://localhost:8080/circulations");
-  //   setCirculations(response.data);
-  // };
+  const deleteCirculation = async (id) => {
+    await axios.delete(`http://localhost:8080/circulation/${id}`);
+    setShowDelete(false);
+    getCirculations();
+  };
 
-  // const addLog = async (data) => {
-  //   await axios.post("http://localhost:8080/add-log", data);
-  // };
+  const changePage = ({ selected }) => {
+    setPage(selected);
+    if (selected === 10) {
+      setMessage(
+        "Jika tidak menemukan data yang Anda cari, silahkan cari data dengan kata kunci spesifik!"
+      );
+    } else {
+      setMessage("");
+    }
+  };
 
-  // const handleClickDelete = (id) => {
-  //   setDeleteId(id);
-  //   setShowDelete(true);
-  // };
-
-  // const deleteCirculation = async (id) => {
-  //   await axios.delete(`http://localhost:8080/delete-circulation/${id}`);
-  //   setShowDelete(false);
-  //   getCirculations();
-  // };
+  const searchData = (e) => {
+    e.preventDefault();
+    setPage(0);
+    setMessage("");
+    setKeyword(query);
+  };
 
   // console.log(addToLog);
   // console.log(deleteId);
@@ -84,27 +98,41 @@ const Circulations = () => {
       {showDelete && (
         <DeleteModal
           show={setShowDelete}
-          onDelete={() => createLog(addToLog) && handleDeleteUser(deleteId)}
+          onDelete={() => addLog(addToLog) & deleteCirculation(deleteId)}
         />
       )}
       <Layout>
         <h1 className="title has-text-centered  mt-3 mb-0">Circulations</h1>
+        <div className="column mb-0">
+          <Link to={"/add-circulation"} className="button is-primary">
+            Add New
+          </Link>
+        </div>
+
         <div className="columns mb-0">
-          <div className="column">
-            <Link to={"/add-circulation"} className="button is-primary">
-              Add New
-            </Link>
-          </div>
-          <div className="column">
-            <input
-              className="input is-normal column is-6 is-offset-6"
-              type="text"
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
-            />
+          <div className="column is-centered">
+            <form onSubmit={searchData}>
+              <div className="field has-addons">
+                <div className="control is-expanded">
+                  <input
+                    type="text"
+                    className="input"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Find something here..."
+                  />
+                </div>
+                <div className="control">
+                  <button type="submit" className="button is-info">
+                    Search
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
-        <p className="help mt-0">Total : {circulations.length}</p>
+
+        <p className="help mt-0">Total : {rows}</p>
         <table className="table is-stripped is-fullwidth">
           <thead>
             <tr>
@@ -119,59 +147,74 @@ const Circulations = () => {
             </tr>
           </thead>
           <tbody>
-            {circulations
-              .filter((c) => {
-                return query.toLowerCase() === ""
-                  ? c
-                  : c.book.title.toLowerCase().includes(query) ||
-                      c.member.toLowerCase().includes(query) ||
-                      c.loanDate.toLowerCase().includes(query);
-              })
-              .map((c, index) => (
-                <tr key={c._id}>
-                  <td>{index + 1}</td>
-                  <td>{c.book.title}</td>
-                  <td>{c.book.author}</td>
-                  <td>{c.member.id}</td>
-                  <td>{c.member.name}</td>
-                  <td>{c.loanDate}</td>
-                  {addDays(c.loanDate, 7) < new Date() ? (
-                    <td className="has-text-weight-bold has-text-danger">
-                      late return
-                    </td>
-                  ) : (
-                    <td className="has-text-weight-bold has-text-success">
-                      loan period
-                    </td>
-                  )}
-                  {console.log(c.book.name)}
-                  <td>
-                    <Link
-                      to={`/circulation/${c._id}`}
-                      className="button is-small is-info"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() =>
-                        handleClickDelete(c._id) &
-                        handleAddLog(
-                          c.book.name,
-                          c.member,
-                          c.loanDate,
-                          new Date().toLocaleString()
-                        )
-                      }
-                      className="button is-small is-danger"
-                    >
-                      Return
-                    </button>
+            {circulations.map((c, index) => (
+              <tr key={c._id}>
+                <td>{index + 1}</td>
+                <td>{c.book.title}</td>
+                <td>{c.book.author}</td>
+                <td>{c.member.id}</td>
+                <td>{c.member.name}</td>
+                <td>{c.loanDate}</td>
+                {addDays(c.loanDate, 7) < new Date() ? (
+                  <td className="has-text-weight-bold has-text-danger">
+                    late return
                   </td>
-                </tr>
-              ))
-              .splice(0, 10)}
+                ) : (
+                  <td className="has-text-weight-bold has-text-success">
+                    loan period
+                  </td>
+                )}
+                <td>
+                  <Link
+                    to={`/circulation/${c._id}`}
+                    className="button is-small is-info"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() =>
+                      handleClickDelete(c._id) &
+                      handleAddLog(
+                        c.book.title,
+                        c.book.author,
+                        c.member.id,
+                        c.member.name,
+                        c.loanDate,
+                        new Date().toLocaleString()
+                      )
+                    }
+                    className="button is-small is-danger"
+                  >
+                    Return
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
+        <p>
+          Page: {rows ? page + 1 : page} of {pages}
+        </p>
+        <p className="has-text-centered has-text-danger">{message}</p>
+        <nav
+          className="pagination is-centered"
+          key={rows}
+          role="navigation"
+          aria-label="pagination"
+        >
+          <ReactPaginate
+            previousLabel={"< Prev"}
+            nextLabel={"Next >"}
+            pageCount={Math.min(10, pages)}
+            onPageChange={changePage}
+            containerClassName={"pagination-list"}
+            pageLinkClassName={"pagination-link"}
+            previousLinkClassName={"pagination-previous"}
+            nextLinkClassName={"pagination-next"}
+            activeLinkClassName={"pagination-link is-current"}
+            disabledLinkClassName={"pagination-link is-disabled"}
+          />
+        </nav>
       </Layout>
     </>
   );

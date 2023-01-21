@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-
-import { saveUser } from "../../features/userSlice.jsx";
+import axios from "axios";
 
 const AddUser = () => {
   const [username, setUsername] = useState("");
@@ -11,36 +9,23 @@ const AddUser = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const createUser = async (e) => {
+  const saveUser = async (e) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      setMessage("Password do not match");
-      return;
+    try {
+      await axios.post("http://localhost:8080/user", {
+        username,
+        email,
+        password,
+        confirmPassword,
+      });
+      navigate("/users");
+    } catch (error) {
+      if (error.response) {
+        setMessage(error.response.data.message);
+      }
     }
-
-    await dispatch(saveUser({ username, email, password, confirmPassword }));
-    navigate("/users");
   };
-
-  // const saveUser = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await axios.post("http://localhost:8080/add-user", {
-  //       username,
-  //       email,
-  //       password,
-  //       confirmPassword,
-  //     });
-  //     navigate("/users");
-  //   } catch (error) {
-  //     if (error.response) {
-  //       setMessage(error.response.data.message);
-  //     }
-  //   }
-  // };
 
   return (
     <div className="container is-fluid">
@@ -49,7 +34,7 @@ const AddUser = () => {
       <div className="card is-shadowless">
         <div className="card-content">
           <div className="content">
-            <form onSubmit={createUser}>
+            <form onSubmit={saveUser}>
               <div className="field">
                 <label className="label">Username</label>
                 <div className="control">

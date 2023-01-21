@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-
-import { userSelectors, updateUser } from "../../features/userSlice.jsx";
+import axios from "axios";
 
 const UpdateUser = () => {
   const [username, setUsername] = useState("");
@@ -12,59 +10,36 @@ const UpdateUser = () => {
   const [message, setMessage] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const user = useSelector((state) => userSelectors.selectById(state, id));
 
   useEffect(() => {
-    if (user) {
-      setUsername(user.username);
-      setEmail(user.email);
-    }
-  }, [user]);
+    const getUserById = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/user/${id}`);
+        setUsername(response.data.username);
+        setEmail(response.data.email);
+      } catch (error) {
+        if (error) console.log(error);
+      }
+    };
+    getUserById();
+  }, [id]);
 
-  const handleUpdate = async (e) => {
+  const updateUser = async (e) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      setMessage("Password do not match");
-      return;
+    try {
+      await axios.patch(`http://localhost:8080/user/${id}`, {
+        username,
+        email,
+        password,
+        confirmPassword,
+      });
+      navigate("/users");
+    } catch (error) {
+      if (error.response) {
+        setMessage(error.response.data.message);
+      }
     }
-    await dispatch(
-      updateUser({ id, username, email, password, confirmPassword })
-    );
-    navigate("/users");
   };
-
-  // useEffect(() => {
-  //   const getUserById = async () => {
-  //     try {
-  //       const response = await axios.get(`http://localhost:8080/user/${id}`);
-  //       setUsername(response.data.username);
-  //       setEmail(response.data.email);
-  //     } catch (error) {
-  //       if (error) console.log(error);
-  //     }
-  //   };
-  //   getUserById();
-  // }, [id]);
-
-  // const updateUser = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await axios.patch(`http://localhost:8080/user/${id}`, {
-  //       username,
-  //       email,
-  //       password,
-  //       confirmPassword,
-  //     });
-  //     navigate("/users");
-  //   } catch (error) {
-  //     if (error.response) {
-  //       setMessage(error.response.data.message);
-  //     }
-  //   }
-  // };
 
   // console.log(password);
   // console.log(confirmPassword);
@@ -77,7 +52,7 @@ const UpdateUser = () => {
       <div className="card is-shadowless">
         <div className="card-content">
           <div className="content">
-            <form onSubmit={handleUpdate}>
+            <form onSubmit={updateUser}>
               <div className="field">
                 <label className="label">Username</label>
                 <div className="control">

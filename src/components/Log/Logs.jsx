@@ -1,23 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
-import { getLogs, logSelectors, deleteLog } from "../../features/logSlice.jsx";
+import axios from "axios";
+import ReactPaginate from "react-paginate";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
 
 const Logs = () => {
-  //const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState([]);
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [rows, setRows] = useState(0);
+  const [pages, setPages] = useState(0);
+  const [keyword, setKeyword] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const [deleteId, setDeleteId] = useState("");
-  const dispatch = useDispatch();
-
-  const logs = useSelector(logSelectors.selectAll);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    dispatch(getLogs());
-  }, [dispatch]);
+    getLogs();
+  }, [page, keyword]);
+
+  const getLogs = async () => {
+    const response = await axios.get(
+      `http://localhost:8080/log?page=${page}&search=${keyword}`
+    );
+    setLogs(response.data.logs);
+    setPage(response.data.page);
+    setRows(response.data.totalRows);
+    setPages(response.data.totalPages);
+  };
 
   const handleClickDelete = (id) => {
     setDeleteId(id);
@@ -25,18 +36,36 @@ const Logs = () => {
   };
 
   const handleDeleteLog = async (id) => {
-    await dispatch(deleteLog(id));
+    await deleteLog(id);
     setShowDelete(false);
+    getLogs();
   };
 
-  // useEffect(() => {
-  //   getLogs();
-  // }, []);
+  const deleteLog = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/log/${id}`);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
 
-  // const getLogs = async () => {
-  //   const response = await axios.get("http://localhost:8080/logs");
-  //   setLogs(response.data);
-  // };
+  const changePage = ({ selected }) => {
+    setPage(selected);
+    if (selected === 10) {
+      setMessage(
+        "Jika tidak menemukan data yang Anda cari, silahkan cari data dengan kata kunci spesifik!"
+      );
+    } else {
+      setMessage("");
+    }
+  };
+
+  const searchData = (e) => {
+    e.preventDefault();
+    setPage(0);
+    setMessage("");
+    setKeyword(query);
+  };
 
   return (
     <>
@@ -49,22 +78,36 @@ const Logs = () => {
       <Layout>
         <h1 className="title has-text-centered mt-3 mb-0">Log Data</h1>
         <div className="columns mb-0">
-          <div className="column">
-            <input
-              className="input is-normal column is-4 is-offset-8"
-              type="text"
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
-            />
+          <div className="column is-centered">
+            <form onSubmit={searchData}>
+              <div className="field has-addons">
+                <div className="control is-expanded">
+                  <input
+                    type="text"
+                    className="input"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Find something here..."
+                  />
+                </div>
+                <div className="control">
+                  <button type="submit" className="button is-info">
+                    Search
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
 
-        <p className="help mt-0">Total: {logs.length}</p>
+        <p className="help mt-0">Total : {rows}</p>
         <table className="table is-stripped is-fullwidth">
           <thead>
             <tr>
               <th>No</th>
-              <th>Book Name</th>
+              <th>Book Title</th>
+              <th>Book Author</th>
+              <th>Member ID</th>
               <th>Member Name</th>
               <th>Loan Date</th>
               <th>Return date</th>
@@ -72,33 +115,50 @@ const Logs = () => {
             </tr>
           </thead>
           <tbody>
-            {logs
-              .filter((log) => {
-                return query.toLowerCase() === ""
-                  ? log
-                  : log.book.toLowerCase().includes(query) ||
-                      log.member.toLowerCase().includes(query);
-              })
-              .map((log, index) => (
-                <tr key={log._id}>
-                  <td>{index + 1}</td>
-                  <td>{log.book}</td>
-                  <td>{log.member}</td>
-                  <td>{log.loanDate}</td>
-                  <td>{log.returnDate}</td>
-                  <td>
-                    <button
-                      onClick={() => handleClickDelete(log._id)}
-                      className="button is-small is-danger"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-              .splice(0, 10)}
+            {logs.map((log, index) => (
+              <tr key={log._id}>
+                <td>{index + 1}</td>
+                <td>{log.book.title}</td>
+                <td>{log.book.author}</td>
+                <td>{log.member.id}</td>
+                <td>{log.member.name}</td>
+                <td>{log.loanDate}</td>
+                <td>{log.returnDate}</td>
+                <td>
+                  <button
+                    onClick={() => handleClickDelete(log._id)}
+                    className="button is-small is-danger"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
+        <p>
+          Page: {rows ? page + 1 : page} of {pages}
+        </p>
+        <p className="has-text-centered has-text-danger">{message}</p>
+        <nav
+          className="pagination is-centered"
+          key={rows}
+          role="navigation"
+          aria-label="pagination"
+        >
+          <ReactPaginate
+            previousLabel={"< Prev"}
+            nextLabel={"Next >"}
+            pageCount={Math.min(10, pages)}
+            onPageChange={changePage}
+            containerClassName={"pagination-list"}
+            pageLinkClassName={"pagination-link"}
+            previousLinkClassName={"pagination-previous"}
+            nextLinkClassName={"pagination-next"}
+            activeLinkClassName={"pagination-link is-current"}
+            disabledLinkClassName={"pagination-link is-disabled"}
+          />
+        </nav>
       </Layout>
     </>
   );

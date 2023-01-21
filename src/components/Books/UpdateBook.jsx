@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-
-import { updateBook, bookSelectors } from "../../features/bookSlice.jsx";
+import axios from "axios";
 
 const UpdateBook = () => {
   const [name, setName] = useState("");
@@ -12,59 +10,42 @@ const UpdateBook = () => {
   const [year, setYear] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const book = useSelector((state) => bookSelectors.selectById(state, id));
 
   useEffect(() => {
-    if (book) {
-      setName(book.name);
-      setCategory(book.category);
-      setAuthor(book.author);
-      setPublisher(book.publisher);
-      setYear(book.year);
-    }
-  }, [book]);
+    const getBookById = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/book/${id}`);
+        setName(response.data.name);
+        setCategory(response.data.category);
+        setAuthor(response.data.author);
+        setPublisher(response.data.publisher);
+        setYear(response.data.year);
+      } catch (error) {
+        if (error.response) {
+          console.log(error.response.data.message);
+        }
+      }
+    };
+    getBookById();
+  }, [id]);
 
-  const handleUpdate = async (e) => {
+  const updateBook = async (e) => {
     e.preventDefault();
-    dispatch(updateBook({ id, name, category, author, publisher, year }));
-    navigate("/books");
+    try {
+      await axios.patch(`http://localhost:8080/book/${id}`, {
+        name,
+        category,
+        author,
+        publisher,
+        year,
+      });
+      navigate("/books");
+    } catch (error) {
+      if (error) {
+        console.log(error);
+      }
+    }
   };
-
-  // useEffect(() => {
-  //   const getBookById = async () => {
-  //     try {
-  //       const response = await axios.get(`http://localhost:8080/book/${id}`);
-  //       setName(response.data.name);
-  //       setCategory(response.data.category);
-  //       setAuthor(response.data.author);
-  //       setPublisher(response.data.publisher);
-  //       setYear(response.data.year);
-  //     } catch (error) {
-  //       if (error) console.log(error);
-  //     }
-  //   };
-  //   getBookById();
-  // }, [id]);
-
-  // const updateBook = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await axios.patch(`http://localhost:8080/book/${id}`, {
-  //       name,
-  //       category,
-  //       author,
-  //       publisher,
-  //       year,
-  //     });
-  //     navigate("/books");
-  //   } catch (error) {
-  //     if (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // };
 
   return (
     <div className="container is-fluid">
@@ -73,7 +54,7 @@ const UpdateBook = () => {
       <div className="card is-shadowless">
         <div className="card-content">
           <div className="content">
-            <form onSubmit={handleUpdate}>
+            <form onSubmit={updateBook}>
               <div className="field">
                 <label className="label">Book Name</label>
                 <div className="control">

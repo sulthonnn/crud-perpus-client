@@ -1,76 +1,114 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-
-import {
-  getBooks,
-  bookSelectors,
-  deleteBook,
-} from "../../features/bookSlice.jsx";
+import axios from "axios";
+import ReactPaginate from "react-paginate";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
 
 const BookList = () => {
-  //const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState([]);
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [rows, setRows] = useState(0);
+  const [pages, setPages] = useState(0);
+  const [keyword, setKeyword] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const [deleteId, setDeleteId] = useState("");
-  const dispatch = useDispatch();
-
-  const books = useSelector(bookSelectors.selectAll);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    dispatch(getBooks());
-  }, [dispatch]);
+    getBooks();
+  }, [page, keyword]);
+
+  const getBooks = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/book?page=${page}&search=${keyword}`
+      );
+      setBooks(response.data.books);
+      setPage(response.data.page);
+      setRows(response.data.totalRows);
+      setPages(response.data.totalPages);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
+
+  const deleteBook = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/book/${id}`);
+      setShowDelete(false);
+      getBooks();
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
 
   const handleClickDelete = (id) => {
     setDeleteId(id);
     setShowDelete(true);
   };
 
-  const handleDeleteBook = async (id) => {
-    await dispatch(deleteBook(id));
-    setShowDelete(false);
+  const changePage = ({ selected }) => {
+    setPage(selected);
+    if (selected === 10) {
+      setMessage(
+        "Jika tidak menemukan data yang Anda cari, silahkan cari data dengan kata kunci spesifik!"
+      );
+    } else {
+      setMessage("");
+    }
   };
 
-  // const getBooks = async () => {
-  //   const response = await axios.get(`http://localhost:8080/books`);
-  //   setBooks(response.data);
-  // };
-
-  // const deleteBook = async (bookID) => {
-  //   await axios.delete(`http://localhost:8080/delete-book/${bookID}`);
-  //   setShowDelete(false);
-  //   dispatch(getBooks());
-  // };
+  const searchData = (e) => {
+    e.preventDefault();
+    setPage(0);
+    setMessage("");
+    setKeyword(query);
+  };
 
   return (
     <>
       {showDelete && (
         <DeleteModal
           show={setShowDelete}
-          onDelete={() => handleDeleteBook(deleteId)}
+          onDelete={() => deleteBook(deleteId)}
         />
       )}
       <Layout>
         <h1 className="title has-text-centered mt-3 mb-0">List of Books</h1>
+
+        <div className="column mb-0">
+          <Link to={"/add-book"} className="button is-primary">
+            Add New
+          </Link>
+        </div>
+
         <div className="columns mb-0">
-          <div className="column">
-            <Link to={"/add-book"} className="button is-primary">
-              Add New
-            </Link>
-          </div>
-          <div className="column">
-            <input
-              className="input is-normal column is-6 is-offset-6"
-              type="text"
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
-            />
+          <div className="column is-centered">
+            <form onSubmit={searchData}>
+              <div className="field has-addons">
+                <div className="control is-expanded">
+                  <input
+                    type="text"
+                    className="input"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Find something here..."
+                  />
+                </div>
+                <div className="control">
+                  <button type="submit" className="button is-info">
+                    Search
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
-        <p className="help mt-0">Total : {books.length}</p>
+
+        <p className="help mt-0">Total : {rows}</p>
 
         <table className="table is-stripped is-fullwidth">
           <thead>
@@ -85,42 +123,55 @@ const BookList = () => {
             </tr>
           </thead>
           <tbody>
-            {books
-              .filter((book) => {
-                return query.toLowerCase() === ""
-                  ? book
-                  : book.name.toLowerCase().includes(query) ||
-                      book.category.toLowerCase().includes(query) ||
-                      book.author.toLowerCase().includes(query) ||
-                      book.publisher.toLowerCase().includes(query);
-              })
-              .map((book, index) => (
-                <tr key={book._id}>
-                  <td>{index + 1}</td>
-                  <td>{book.name}</td>
-                  <td>{book.category}</td>
-                  <td>{book.author}</td>
-                  <td>{book.publisher}</td>
-                  <td>{book.year}</td>
-                  <td>
-                    <Link
-                      to={`/book/${book._id}`}
-                      className="button is-small is-info"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => handleClickDelete(book._id)}
-                      className="button is-small is-danger"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-              .splice(0, 10)}
+            {books.map((book, index) => (
+              <tr key={book._id}>
+                <td>{index + 1}</td>
+                <td>{book.name}</td>
+                <td>{book.category}</td>
+                <td>{book.author}</td>
+                <td>{book.publisher}</td>
+                <td>{book.year}</td>
+                <td>
+                  <Link
+                    to={`/book/${book._id}`}
+                    className="button is-small is-info"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => handleClickDelete(book._id)}
+                    className="button is-small is-danger"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
+        <p>
+          Page: {rows ? page + 1 : page} of {pages}
+        </p>
+        <p className="has-text-centered has-text-danger">{message}</p>
+        <nav
+          className="pagination is-centered"
+          key={rows}
+          role="navigation"
+          aria-label="pagination"
+        >
+          <ReactPaginate
+            previousLabel={"< Prev"}
+            nextLabel={"Next >"}
+            pageCount={Math.min(10, pages)}
+            onPageChange={changePage}
+            containerClassName={"pagination-list"}
+            pageLinkClassName={"pagination-link"}
+            previousLinkClassName={"pagination-previous"}
+            nextLinkClassName={"pagination-next"}
+            activeLinkClassName={"pagination-link is-current"}
+            disabledLinkClassName={"pagination-link is-disabled"}
+          />
+        </nav>
       </Layout>
     </>
   );

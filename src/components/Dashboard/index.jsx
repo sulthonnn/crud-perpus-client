@@ -1,15 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-
-import { bookSelectors, getBooks } from "../../features/bookSlice.jsx";
-import { memberSelectors, getMembers } from "../../features/memberSlice.jsx";
-import {
-  circulationSelectors,
-  getCirculations,
-} from "../../features/circulationSlice.jsx";
-import { logSelectors, getLogs } from "../../features/logSlice.jsx";
-import { userSelectors, getUsers } from "../../features/userSlice.jsx";
+import axios from "axios";
 
 import {
   AiFillBook,
@@ -21,20 +12,64 @@ import { GrCatalog } from "react-icons/gr";
 import styles from "./Dashboard.module.css";
 
 const Dashboard = () => {
-  const books = useSelector(bookSelectors.selectAll);
-  const members = useSelector(memberSelectors.selectAll);
-  const circulations = useSelector(circulationSelectors.selectAll);
-  const logs = useSelector(logSelectors.selectAll);
-  const users = useSelector(userSelectors.selectAll);
-  const dispatch = useDispatch();
+  const [books, setBooks] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [circulations, setCirculations] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    dispatch(getBooks());
-    dispatch(getMembers());
-    dispatch(getCirculations());
-    dispatch(getLogs());
-    dispatch(getUsers());
-  }, [dispatch]);
+    getBooks();
+    getMembers();
+    getCirculations();
+    getLogs();
+    getUsers();
+  }, []);
+
+  const getMembers = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/members");
+      setMembers(response.data.members);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
+
+  const getBooks = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/books");
+      setBooks(response.data.books);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
+
+  const getCirculations = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/circulations");
+      setCirculations(response.data.circulations);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
+
+  const getLogs = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/logs");
+      setLogs(response.data.logs);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
+
+  const getUsers = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/users");
+      setUsers(response.data.users);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
 
   return (
     <div className="container">

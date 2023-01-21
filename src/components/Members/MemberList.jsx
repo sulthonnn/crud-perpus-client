@@ -1,28 +1,67 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-
-import {
-  getMembers,
-  memberSelectors,
-  deleteMember,
-} from "../../features/memberSlice.jsx";
+import ReactPaginate from "react-paginate";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
+import axios from "axios";
 
 const MemberList = () => {
-  //const [members, setMembers] = useState([]);
+  const [members, setMembers] = useState([]);
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [rows, setRows] = useState(0);
+  const [pages, setPages] = useState(0);
+  const [keyword, setKeyword] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const [deleteId, setDeleteId] = useState("");
-  const dispatch = useDispatch();
-
-  const members = useSelector(memberSelectors.selectAll);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    dispatch(getMembers());
-  }, [dispatch]);
+    getMembers();
+  }, [page, keyword]);
+
+  const getMembers = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/member?page=${page}&search=${keyword}`
+      );
+      setMembers(response.data.members);
+      setPage(response.data.page);
+      setRows(response.data.totalRows);
+      setPages(response.data.totalPages);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
+
+  const deleteMember = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/member/${id}`);
+      setShowDelete(false);
+      getMembers();
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  };
+
+  const changePage = ({ selected }) => {
+    setPage(selected);
+    if (selected === 10) {
+      setMessage(
+        "Jika tidak menemukan data yang Anda cari, silahkan cari data dengan kata kunci spesifik!"
+      );
+    } else {
+      setMessage("");
+    }
+  };
+
+  const searchData = (e) => {
+    e.preventDefault();
+    setPage(0);
+    setMessage("");
+    setKeyword(query);
+  };
 
   const handleClickDelete = (id) => {
     setDeleteId(id);
@@ -30,20 +69,9 @@ const MemberList = () => {
   };
 
   const handleDeleteMember = async (id) => {
-    await dispatch(deleteMember(id));
+    await deleteMember(id);
     setShowDelete(false);
   };
-
-  // const getMembers = async () => {
-  //   const response = await axios.get("http://localhost:8080/members");
-  //   setMembers(response.data);
-  // };
-
-  // const deleteMember = async (memberID) => {
-  //   await axios.delete(`http://localhost:8080/delete-member/${memberID}`);
-  //   setShowDelete(false);
-  //   getMembers();
-  // };
 
   return (
     <>
@@ -55,22 +83,37 @@ const MemberList = () => {
       )}
       <Layout>
         <h1 className="title has-text-centered  mt-3 mb-0">List of Members</h1>
+
+        <div className="column mb-0">
+          <Link to={"/add-member"} className="button is-primary">
+            Add New
+          </Link>
+        </div>
+
         <div className="columns mb-0">
-          <div className="column">
-            <Link to={"/add-member"} className="button is-primary">
-              Add New
-            </Link>
-          </div>
-          <div className="column">
-            <input
-              className="input is-normal column is-6 is-offset-6"
-              type="text"
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
-            />
+          <div className="column is-centered">
+            <form onSubmit={searchData}>
+              <div className="field has-addons">
+                <div className="control is-expanded">
+                  <input
+                    type="text"
+                    className="input"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Find something here..."
+                  />
+                </div>
+                <div className="control">
+                  <button type="submit" className="button is-info">
+                    Search
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
-        <p className="help mt-0">Total : {members.length}</p>
+
+        <p className="help mt-0">Total : {rows}</p>
         <table className="table is-stripped is-fullwidth">
           <thead>
             <tr>
@@ -85,44 +128,56 @@ const MemberList = () => {
             </tr>
           </thead>
           <tbody>
-            {members
-              .filter((member) => {
-                return query.toLowerCase() === ""
-                  ? member
-                  : member.sid.toLowerCase().includes(query) ||
-                      member.name.toLowerCase().includes(query) ||
-                      member.gender.toLowerCase().includes(query) ||
-                      member.address.toLowerCase().includes(query) ||
-                      member.email.toLowerCase().includes(query);
-              })
-              .map((member, index) => (
-                <tr key={member._id}>
-                  <td>{index + 1}</td>
-                  <td>{member._id}</td>
-                  <td>{member.name}</td>
-                  <td>{member.gender}</td>
-                  <td>{member.address}</td>
-                  <td>{member.email}</td>
-                  <td>{member.phone}</td>
-                  <td>
-                    <Link
-                      to={`/member/${member._id}`}
-                      className="button is-small is-info"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => handleClickDelete(member._id)}
-                      className="button is-small is-danger"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-              .splice(0, 10)}
+            {members.map((member, index) => (
+              <tr key={member._id}>
+                <td>{index + 1}</td>
+                <td>{member._id}</td>
+                <td>{member.name}</td>
+                <td>{member.gender}</td>
+                <td>{member.address}</td>
+                <td>{member.email}</td>
+                <td>{member.phone}</td>
+                <td>
+                  <Link
+                    to={`/member/${member._id}`}
+                    className="button is-small is-info"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => handleClickDelete(member._id)}
+                    className="button is-small is-danger"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
+        <p>
+          Page: {rows ? page + 1 : page} of {pages}
+        </p>
+        <p className="has-text-centered has-text-danger">{message}</p>
+        <nav
+          className="pagination is-centered"
+          key={rows}
+          role="navigation"
+          aria-label="pagination"
+        >
+          <ReactPaginate
+            previousLabel={"< Prev"}
+            nextLabel={"Next >"}
+            pageCount={Math.min(10, pages)}
+            onPageChange={changePage}
+            containerClassName={"pagination-list"}
+            pageLinkClassName={"pagination-link"}
+            previousLinkClassName={"pagination-previous"}
+            nextLinkClassName={"pagination-next"}
+            activeLinkClassName={"pagination-link is-current"}
+            disabledLinkClassName={"pagination-link is-disabled"}
+          />
+        </nav>
       </Layout>
     </>
   );

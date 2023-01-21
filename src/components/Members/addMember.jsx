@@ -28,29 +28,11 @@ const AddMember = () => {
       navigate("/members");
     } catch (error) {
       if (error.response) {
-        setMessage("ID already exists");
+        setMessage(error.response.data.message);
         return;
       }
     }
   };
-
-  // const saveMember = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await axios.post("http://localhost:8080/add-member", {
-  //       name,
-  //       gender,
-  //       address,
-  //       email,
-  //       phone,
-  //     });
-  //     navigate("/members");
-  //   } catch (error) {
-  //     if (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // };
 
   return (
     <div className="container is-fluid">
