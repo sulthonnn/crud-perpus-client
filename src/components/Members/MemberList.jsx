@@ -2,9 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ReactPaginate from "react-paginate";
 
+import {
+  getPaginatedMembersFunc,
+  deleteMemberFunc,
+} from "../services/memberApi.js";
+
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
-import axios from "axios";
 
 const MemberList = () => {
   const [members, setMembers] = useState([]);
@@ -23,9 +27,7 @@ const MemberList = () => {
 
   const getMembers = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/member?page=${page}&search=${keyword}`
-      );
+      const response = await getPaginatedMembersFunc(page, keyword);
       setMembers(response.data.members);
       setPage(response.data.page);
       setRows(response.data.totalRows);
@@ -37,7 +39,7 @@ const MemberList = () => {
 
   const deleteMember = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/member/${id}`);
+      await deleteMemberFunc(id);
       setShowDelete(false);
       getMembers();
     } catch (error) {
@@ -48,9 +50,7 @@ const MemberList = () => {
   const changePage = ({ selected }) => {
     setPage(selected);
     if (selected === 10) {
-      setMessage(
-        "Jika tidak menemukan data yang Anda cari, silahkan cari data dengan kata kunci spesifik!"
-      );
+      setMessage("If not found, please use search by keyword");
     } else {
       setMessage("");
     }

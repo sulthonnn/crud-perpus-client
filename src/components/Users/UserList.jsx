@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+
 import ReactPaginate from "react-paginate";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
+import { deleteUserFunc, getPaginatedUsersFunc } from "../services/userApi.js";
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -23,9 +24,7 @@ const UserList = () => {
 
   const getUsers = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/user?page=${page}&search=${keyword}`
-      );
+      const response = await getPaginatedUsersFunc(page, keyword);
       setUsers(response.data.users);
       setPage(response.data.page);
       setRows(response.data.totalRows);
@@ -36,7 +35,7 @@ const UserList = () => {
   };
 
   const deleteUser = async (id) => {
-    await axios.delete(`http://localhost:8080/user/${id}`);
+    await deleteUserFunc(id);
     setShowDelete(false);
     getUsers();
   };
@@ -54,9 +53,7 @@ const UserList = () => {
   const changePage = ({ selected }) => {
     setPage(selected);
     if (selected === 10) {
-      setMessage(
-        "Jika tidak menemukan data yang Anda cari, silahkan cari data dengan kata kunci spesifik!"
-      );
+      setMessage("If not found, please use search by keyword");
     } else {
       setMessage("");
     }

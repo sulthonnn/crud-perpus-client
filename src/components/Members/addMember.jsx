@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
-import axios from "axios";
+import { addMemberFunc } from "../services/memberApi";
 
 const AddMember = () => {
   const [ID, setID] = useState("");
@@ -13,18 +13,20 @@ const AddMember = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+  const data = {
+    _id: ID,
+    name,
+    gender,
+    address,
+    email,
+    phone,
+  };
+
   const createMember = async (e) => {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:8080/member", {
-        _id: ID,
-        name,
-        gender,
-        address,
-        email,
-        phone,
-      });
+      await addMemberFunc(data);
       navigate("/members");
     } catch (error) {
       if (error.response) {

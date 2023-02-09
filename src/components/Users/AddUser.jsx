@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+
+import { addUserFunc } from "../services/userApi";
 
 const AddUser = () => {
   const [username, setUsername] = useState("");
@@ -8,24 +9,32 @@ const AddUser = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
   const navigate = useNavigate();
+
+  const data = {
+    username,
+    email,
+    password,
+    confirmPassword,
+  };
 
   const saveUser = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/user", {
-        username,
-        email,
-        password,
-        confirmPassword,
-      });
+      await addUserFunc(data);
+      if (password !== confirmPassword) {
+        setIsError(true);
+        setMessage("Password does not match");
+        return;
+      }
       navigate("/users");
     } catch (error) {
-      if (error.response) {
-        setMessage(error.response.data.message);
-      }
+      console.log(error);
     }
   };
+
+  console.log(message);
 
   return (
     <div className="container is-fluid">
@@ -34,6 +43,11 @@ const AddUser = () => {
       <div className="card is-shadowless">
         <div className="card-content">
           <div className="content">
+            {isError && (
+              <p className="help has-text-centered has-text-danger">
+                {message}
+              </p>
+            )}
             <form onSubmit={saveUser}>
               <div className="field">
                 <label className="label">Username</label>
@@ -86,7 +100,6 @@ const AddUser = () => {
                     required={true}
                   />
                 </div>
-                <p className="help has-text-danger">{message}</p>
               </div>
               <div className="field">
                 <div className="control">

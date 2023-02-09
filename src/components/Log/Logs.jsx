@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import ReactPaginate from "react-paginate";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
+import { deleteLogFunc, getPaginatedLogsFunc } from "../services/logApi.js";
 
 const Logs = () => {
   const [logs, setLogs] = useState([]);
@@ -21,9 +21,7 @@ const Logs = () => {
   }, [page, keyword]);
 
   const getLogs = async () => {
-    const response = await axios.get(
-      `http://localhost:8080/log?page=${page}&search=${keyword}`
-    );
+    const response = await getPaginatedLogsFunc(page, keyword);
     setLogs(response.data.logs);
     setPage(response.data.page);
     setRows(response.data.totalRows);
@@ -43,7 +41,7 @@ const Logs = () => {
 
   const deleteLog = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/log/${id}`);
+      await deleteLogFunc(id);
     } catch (error) {
       console.log(error.response.data.message);
     }
@@ -52,9 +50,7 @@ const Logs = () => {
   const changePage = ({ selected }) => {
     setPage(selected);
     if (selected === 10) {
-      setMessage(
-        "Jika tidak menemukan data yang Anda cari, silahkan cari data dengan kata kunci spesifik!"
-      );
+      setMessage("If not found, please use search by keyword");
     } else {
       setMessage("");
     }

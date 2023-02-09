@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { getBooksFunc } from "../services/bookApi";
+import { addCirculationFunc } from "../services/circulationApi";
+import { getMembersFunc } from "../services/memberApi";
 
 const AddCirculation = () => {
   const [books, setBooks] = useState([]);
@@ -12,6 +14,15 @@ const AddCirculation = () => {
   const [queryMember, setQueryMember] = useState("");
   const navigate = useNavigate();
 
+  const data = {
+    book: {
+      title: queryBook,
+      author: queryBookAuthor,
+    },
+    member: { id: queryID, name: queryMember },
+    loanDate,
+  };
+
   useEffect(() => {
     getBooks();
     getMembers();
@@ -20,14 +31,7 @@ const AddCirculation = () => {
   const saveCirculation = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/circulation", {
-        book: {
-          title: queryBook,
-          author: queryBookAuthor,
-        },
-        member: { id: queryID, name: queryMember },
-        loanDate,
-      });
+      await addCirculationFunc(data);
       navigate("/circulations");
     } catch (error) {
       if (error) {
@@ -38,7 +42,7 @@ const AddCirculation = () => {
 
   const getMembers = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/members");
+      const response = await getMembersFunc();
       setMembers(response.data.members);
     } catch (error) {
       console.log(error.response.data.message);
@@ -47,7 +51,7 @@ const AddCirculation = () => {
 
   const getBooks = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/books");
+      const response = await getBooksFunc();
       setBooks(response.data.books);
     } catch (error) {
       console.log(error.response.data.message);

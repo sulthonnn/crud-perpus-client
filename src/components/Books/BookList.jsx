@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import ReactPaginate from "react-paginate";
+
+import { getPaginatedBooksFunc, deleteBookFunc } from "../services/bookApi.js";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
@@ -23,9 +24,7 @@ const BookList = () => {
 
   const getBooks = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/book?page=${page}&search=${keyword}`
-      );
+      const response = await getPaginatedBooksFunc(page, keyword);
       setBooks(response.data.books);
       setPage(response.data.page);
       setRows(response.data.totalRows);
@@ -37,7 +36,7 @@ const BookList = () => {
 
   const deleteBook = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/book/${id}`);
+      await deleteBookFunc(id);
       setShowDelete(false);
       getBooks();
     } catch (error) {

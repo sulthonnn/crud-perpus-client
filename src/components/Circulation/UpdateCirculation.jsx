@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import axios from "axios";
+import { getBooksFunc } from "../services/bookApi";
+
+import {
+  getCirculationByIdFunc,
+  updateCirculationFunc,
+} from "../services/circulationApi";
+import { getMembersFunc } from "../services/memberApi";
 
 const UpdateCirculation = () => {
   const [books, setBooks] = useState([]);
@@ -13,12 +19,19 @@ const UpdateCirculation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const data = {
+    book: {
+      title: queryBook,
+      author: queryBookAuthor,
+    },
+    member: { id: queryMemberId, name: queryMember },
+    loanDate,
+  };
+
   useEffect(() => {
     const getCircById = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/circulation/${id}`
-        );
+        const response = await getCirculationByIdFunc(id);
         setQueryBook(response.data.book.title);
         setQueryBookAuthor(response.data.book.author);
         setQueryMemberId(response.data.member.id);
@@ -37,11 +50,7 @@ const UpdateCirculation = () => {
   const updateCirculation = async (e) => {
     e.preventDefault();
     try {
-      await axios.patch(`http://localhost:8080/circulation/${id}`, {
-        book: queryBook,
-        member: queryMember,
-        loanDate,
-      });
+      await updateCirculationFunc(id, data);
       navigate("/circulations");
     } catch (error) {
       if (error) {
@@ -52,7 +61,7 @@ const UpdateCirculation = () => {
 
   const getMembers = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/member");
+      const response = await getMembersFunc();
       setMembers(response.data.members);
     } catch (error) {
       console.log(error.response.data.message);
@@ -61,7 +70,7 @@ const UpdateCirculation = () => {
 
   const getBooks = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/book");
+      const response = await getBooksFunc();
       setBooks(response.data.books);
     } catch (error) {
       console.log(error.response.data.message);

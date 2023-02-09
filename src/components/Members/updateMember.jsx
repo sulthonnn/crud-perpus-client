@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import axios from "axios";
+
+import { getMemberByIdFunc, updateMemberFunc } from "../services/memberApi";
 
 const UpdateMember = () => {
   const [name, setName] = useState("");
@@ -11,10 +12,18 @@ const UpdateMember = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const data = {
+    name,
+    gender,
+    address,
+    email,
+    phone,
+  };
+
   useEffect(() => {
     const getMemberById = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/member/${id}`);
+        const response = await getMemberByIdFunc(id);
         setName(response.data.name);
         setGender(response.data.gender);
         setAddress(response.data.address);
@@ -30,13 +39,7 @@ const UpdateMember = () => {
   const updateMember = async (e) => {
     e.preventDefault();
     try {
-      await axios.patch(`http://localhost:8080/member/${id}`, {
-        name,
-        gender,
-        address,
-        email,
-        phone,
-      });
+      await updateMemberFunc(id, data);
       navigate("/members");
     } catch (error) {
       if (error.response) {

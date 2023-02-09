@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+
+import { addBookFunc } from "../services/bookApi";
 
 const AddBook = () => {
   const [name, setName] = useState("");
@@ -10,16 +11,18 @@ const AddBook = () => {
   const [year, setYear] = useState("");
   const navigate = useNavigate();
 
+  const data = {
+    name,
+    category,
+    author,
+    publisher,
+    year,
+  };
+
   const saveBook = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/book", {
-        name,
-        category,
-        author,
-        publisher,
-        year,
-      });
+      await addBookFunc(data);
       navigate("/books");
     } catch (error) {
       if (error.response) {
@@ -28,6 +31,7 @@ const AddBook = () => {
     }
   };
 
+  console.log(data);
   return (
     <div className="container is-fluid">
       <h1 className="title">Books</h1>

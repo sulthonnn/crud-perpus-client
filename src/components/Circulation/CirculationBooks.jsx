@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import ReactPaginate from "react-paginate";
+
+import {
+  deleteCirculationFunc,
+  getPaginatedCirculationsFunc,
+} from "../services/circulationApi.js";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
+import { addLogFunc } from "../services/logApi.js";
 
 const Circulations = () => {
   const [circulations, setCirculations] = useState([]);
@@ -23,9 +28,7 @@ const Circulations = () => {
   }, [page, keyword]);
 
   const getCirculations = async () => {
-    const response = await axios.get(
-      `http://localhost:8080/circulation?page=${page}&search=${keyword}`
-    );
+    const response = await getPaginatedCirculationsFunc(page, keyword);
     setCirculations(response.data.circulations);
     setPage(response.data.page);
     setRows(response.data.totalRows);
@@ -33,7 +36,7 @@ const Circulations = () => {
   };
 
   const addLog = async (data) => {
-    await axios.post("http://localhost:8080/log", data);
+    await addLogFunc(data);
   };
 
   const handleAddLog = (
@@ -67,7 +70,7 @@ const Circulations = () => {
   };
 
   const deleteCirculation = async (id) => {
-    await axios.delete(`http://localhost:8080/circulation/${id}`);
+    await deleteCirculationFunc(id);
     setShowDelete(false);
     getCirculations();
   };
@@ -75,9 +78,7 @@ const Circulations = () => {
   const changePage = ({ selected }) => {
     setPage(selected);
     if (selected === 10) {
-      setMessage(
-        "Jika tidak menemukan data yang Anda cari, silahkan cari data dengan kata kunci spesifik!"
-      );
+      setMessage("If not found, please use search by keyword");
     } else {
       setMessage("");
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import axios from "axios";
+
+import { getBookByIdFunc, updateBookFunc } from "../services/bookApi";
 
 const UpdateBook = () => {
   const [name, setName] = useState("");
@@ -11,10 +12,18 @@ const UpdateBook = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const data = {
+    name,
+    category,
+    author,
+    publisher,
+    year,
+  };
+
   useEffect(() => {
     const getBookById = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/book/${id}`);
+        const response = await getBookByIdFunc(id);
         setName(response.data.name);
         setCategory(response.data.category);
         setAuthor(response.data.author);
@@ -32,13 +41,7 @@ const UpdateBook = () => {
   const updateBook = async (e) => {
     e.preventDefault();
     try {
-      await axios.patch(`http://localhost:8080/book/${id}`, {
-        name,
-        category,
-        author,
-        publisher,
-        year,
-      });
+      await updateBookFunc(id, data);
       navigate("/books");
     } catch (error) {
       if (error) {

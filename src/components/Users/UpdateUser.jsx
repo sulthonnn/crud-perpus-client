@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import axios from "axios";
+
+import { getUserByIdFunc, updateUserFunc } from "../services/userApi";
 
 const UpdateUser = () => {
   const [username, setUsername] = useState("");
@@ -11,10 +12,17 @@ const UpdateUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const data = {
+    username,
+    email,
+    password,
+    confirmPassword,
+  };
+
   useEffect(() => {
     const getUserById = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/user/${id}`);
+        const response = await getUserByIdFunc(id);
         setUsername(response.data.username);
         setEmail(response.data.email);
       } catch (error) {
@@ -27,12 +35,7 @@ const UpdateUser = () => {
   const updateUser = async (e) => {
     e.preventDefault();
     try {
-      await axios.patch(`http://localhost:8080/user/${id}`, {
-        username,
-        email,
-        password,
-        confirmPassword,
-      });
+      await updateUserFunc(id, data);
       navigate("/users");
     } catch (error) {
       if (error.response) {
