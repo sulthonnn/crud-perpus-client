@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import ReactPaginate from "react-paginate";
 
+import { deleteLogFunc, getPaginatedLogsFunc } from "../services/logApi";
+
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
-import { deleteLogFunc, getPaginatedLogsFunc } from "../services/logApi.js";
 
 const Logs = () => {
   const [logs, setLogs] = useState([]);

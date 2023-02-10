@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
 import ReactPaginate from "react-paginate";
+
+import { deleteUserFunc, getPaginatedUsersFunc } from "../services/userApi";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
-import { deleteUserFunc, getPaginatedUsersFunc } from "../services/userApi.js";
 
 const UserList = () => {
   const [users, setUsers] = useState([]);

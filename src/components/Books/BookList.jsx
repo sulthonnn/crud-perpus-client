@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ReactPaginate from "react-paginate";
 
-import { getPaginatedBooksFunc, deleteBookFunc } from "../services/bookApi.js";
+import { getPaginatedBooksFunc, deleteBookFunc } from "../services/bookApi.jsx";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";

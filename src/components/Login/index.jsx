@@ -35,9 +35,6 @@ const Login = () => {
     navigate("/");
   };
 
-  console.log(user);
-  console.log(user);
-
   return (
     <section
       className="hero is-fullheight is-fullwidth"

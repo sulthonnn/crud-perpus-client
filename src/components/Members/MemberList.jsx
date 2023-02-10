@@ -5,7 +5,7 @@ import ReactPaginate from "react-paginate";
 import {
   getPaginatedMembersFunc,
   deleteMemberFunc,
-} from "../services/memberApi.js";
+} from "../services/memberApi";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";

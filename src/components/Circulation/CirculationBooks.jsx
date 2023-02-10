@@ -5,11 +5,11 @@ import ReactPaginate from "react-paginate";
 import {
   deleteCirculationFunc,
   getPaginatedCirculationsFunc,
-} from "../services/circulationApi.js";
+} from "../services/circulationApi";
+import { addLogFunc } from "../services/logApi";
 
 import Layout from "../../Layout/layout.jsx";
 import DeleteModal from "../DeleteModal";
-import { addLogFunc } from "../services/logApi.js";
 
 const Circulations = () => {
   const [circulations, setCirculations] = useState([]);
