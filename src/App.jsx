@@ -15,7 +15,7 @@ import Logs from "./pages/Log/Logs";
 
 import Login from "./components/Login/index";
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
@@ -37,7 +37,6 @@ function App() {
           <Route path="/circulation/:id" element={<UpdateCirculation />} />
           <Route path="/add-circulation" element={<AddCirculation />} />
           <Route path="/logs" element={<Logs />} />
-          <Route path="/redirect" element={<Navigate to={"/add-member"} />} />
         </Routes>
       </BrowserRouter>
     </>

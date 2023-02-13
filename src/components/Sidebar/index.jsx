@@ -42,7 +42,9 @@ const SideBar = () => {
             <p className="has-text-centered has-text-weight-bold">
               {user && user.username}
             </p>
-            <p className="help subtitle is-6">Administrator</p>
+            <p className="help subtitle is-6 has-text-centered">
+              Administrator
+            </p>
           </div>
         </div>
 

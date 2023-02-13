@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+
+import { getMembersFunc } from "../services/memberApi";
+import { getBooksFunc } from "../services/bookApi";
+import { getCirculationsFunc } from "../services/circulationApi";
+import { getLogsFunc } from "../services/logApi";
+import { getUsersFunc } from "../services/userApi";
 
 import {
   AiFillBook,
@@ -28,7 +33,7 @@ const Dashboard = () => {
 
   const getMembers = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/members");
+      const response = await getMembersFunc();
       setMembers(response.data.members);
     } catch (error) {
       console.log(error.response.data.message);
@@ -37,7 +42,7 @@ const Dashboard = () => {
 
   const getBooks = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/books");
+      const response = await getBooksFunc();
       setBooks(response.data.books);
     } catch (error) {
       console.log(error.response.data.message);
@@ -46,7 +51,7 @@ const Dashboard = () => {
 
   const getCirculations = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/circulations");
+      const response = await getCirculationsFunc();
       setCirculations(response.data.circulations);
     } catch (error) {
       console.log(error.response.data.message);
@@ -55,7 +60,7 @@ const Dashboard = () => {
 
   const getLogs = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/logs");
+      const response = await getLogsFunc();
       setLogs(response.data.logs);
     } catch (error) {
       console.log(error.response.data.message);
@@ -64,7 +69,7 @@ const Dashboard = () => {
 
   const getUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/users");
+      const response = await getUsersFunc();
       setUsers(response.data.users);
     } catch (error) {
       console.log(error.response.data.message);
