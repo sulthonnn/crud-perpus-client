@@ -4,7 +4,7 @@ export const request = async (method, url, body) => {
   let config = {
     method,
     url,
-    headers: {withCredentials: true},
+    withCredentials: true,
     data: body,
   };
 
