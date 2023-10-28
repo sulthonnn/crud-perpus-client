@@ -1,12 +1,10 @@
 import axios from "axios";
 
-export const request = async (method, url, body, header) => {
+export const request = async (method, url, body) => {
   let config = {
     method,
     url,
-    headers: {
-          "Content-Type": "application/json",
-        },
+    headers: {withCredentials: true},
     data: body,
   };
 
