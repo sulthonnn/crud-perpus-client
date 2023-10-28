@@ -4,9 +4,7 @@ export const request = async (method, url, body, header) => {
   let config = {
     method,
     url,
-    headers: header
-      ? header
-      : {
+    headers: {
           "Content-Type": "application/json",
         },
     data: body,
